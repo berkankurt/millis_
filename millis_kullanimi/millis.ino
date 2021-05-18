@@ -3,6 +3,9 @@ int led = 13;
 int led1 = 4;
 int led2 = 5;
 int b = 0;
+bool durum = false;
+bool gate = false;
+bool gate1 = false;
 int LEDdurumu = 0;
 int LEDdurumu1 = 0;
 
@@ -19,31 +22,45 @@ void setup() {
   pinMode(led2, OUTPUT);
 }
 
-void loop() {
 
-  yeniZaman = millis();
-
+void serialEvent() {
   /******************************Usb_port_data_okuma******************************/
   if (Serial.available() > 0) {
     okunanKarakter = Serial.read();
     b = okunanKarakter.toInt();
   }
-  /******************************************zaman millis***********************/
-  if (yeniZaman - eskiZaman > 3000) {
-    if (LEDdurumu == 1) {
-      digitalWrite(led2, LOW);
-      LEDdurumu = 0;
-    }
-    eskiZaman = yeniZaman;
-  }
+}
+void loop() {
+
+  yeniZaman = millis();
 
 
-  if (yeniZaman - eskiZaman1 > 3000) {
-    if (LEDdurumu1 == 1) {
-      digitalWrite(led1, LOW);
-      LEDdurumu1 = 0;
+/******************************************zaman millis***********************/
+
+  if (durum == true) {
+    
+    if (yeniZaman - eskiZaman > 3000) {
+      if (LEDdurumu == 1) {
+        digitalWrite(led2, LOW);
+        LEDdurumu = 0;
+        eskiZaman = 0;
+        gate = false;
+      }
     }
-    eskiZaman1 = yeniZaman;
+
+    if (yeniZaman - eskiZaman1 > 3000) {
+      if (LEDdurumu1 == 1) {
+        digitalWrite(led1, LOW);
+        LEDdurumu1 = 0;
+        eskiZaman1 = 0;
+        gate1 = false;
+      }
+    }
+
+    if ((gate == false) && (gate1 == false)) {
+      durum = false;
+      yeniZaman = 0;
+    }
   }
   /******************************Komut****************************************/
   switch (b) {
@@ -52,15 +69,22 @@ void loop() {
     case '1': {
         digitalWrite(led1, HIGH);
         LEDdurumu1 = 1;
+        durum = true;
+        gate1 = true;
+        eskiZaman1 = millis();
         break;
       }
 
     case '2': {
         digitalWrite(led2, HIGH);
         LEDdurumu = 1;
+        durum = true;
+        gate = true;
+        eskiZaman = millis();
         break;
       }
   }
+
 
   /*************************************************************************/
 }
